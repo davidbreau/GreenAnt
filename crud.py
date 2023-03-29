@@ -1,1 +1,71 @@
 import sqlite3
+
+# Create
+
+def create_user(username: str, first_name:str, last_name:str, mail:str, password:str, token:str):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                 INSERT INTO user 
+                 VALUES (NULL, ?, ?, ?, ?, ?, ?)
+                 """, (username, first_name, last_name, mail, password, token))
+    connexion.commit()
+    connexion.close()
+    
+
+def create_action(company:str, value:float):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                 INSERT INTO action 
+                 VALUES (NULL, ?, ?)
+                 """, (company, value))
+    connexion.commit()
+    connexion.close()
+    
+def link_user_action(user_id:int, action_id:int, bought_value:float, bought_time:str):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                 INSERT INTO user_action
+                 VALUES (?, ?, ?, ?)
+                 """, (user_id, action_id, bought_value, bought_time))
+    connexion.commit()
+    connexion.close()
+    
+def link_user_user(user_id_following:int, user_id_followed:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                 INSERT INTO user_user
+                 VALUES (?, ?)
+                 """, (user_id_following, user_id_followed))
+    connexion.commit()
+    connexion.close()
+    
+def store_value_change(action_id:int, time:str, value:float):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                 INSERT INTO action_value_change
+                 VALUES (?, ?)
+                 """, (action_id, time, value))
+    connexion.commit()
+    connexion.close()
+    
+# Read
+
+# Upgrade
+
+def change_action_value(new_value:int, action_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    UPDATE action 
+                        SET value = ?
+                        WHERE id = ?
+                    """, (new_value, action_id))
+    connexion.commit()
+    connexion.close()
+
+# Delete
