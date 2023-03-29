@@ -55,6 +55,16 @@ def store_value_change(action_id:int, new_value:float):
     
 # Read
 
+def actions_list():
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT company, value FROM action
+                    """)
+    resultat = curseur.fetchall()
+    connexion.close()
+    return resultat
+
 def user_s_actions_list(user_id:int):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
@@ -66,6 +76,9 @@ def user_s_actions_list(user_id:int):
     resultat = curseur.fetchall()
     connexion.close()
     return resultat
+
+            # FONCTION CAPITAL
+
 
 # Upgrade
 
