@@ -55,7 +55,17 @@ def store_value_change(action_id:int, new_value:float):
     
 # Read
 
-def user_s_
+def user_s_actions_list(user_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT user.username, action.company FROM user_action
+                        INNER JOIN action ON user_action.action_id = action.id
+                        WHERE user_action.user_id = ? 
+                    """, (user_id,))
+    resultat = curseur.fetchall()
+    connexion.close()
+    return resultat
 
 # Upgrade
 

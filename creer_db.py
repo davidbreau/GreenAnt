@@ -33,9 +33,9 @@ curseur.execute("""
                     action_id INTEGER,
                     bought_value FLOAT NOT NULL,
                     bought_time TEXT NOT NULL,
-                    sold BOOLEAN DEFAULT FALSE,
-                    sold_value FLOAT DEFAULT NULL,
-                    sold_time TEXT DEFAULT NULL,
+                    sold BOOLEAN DEFAULT 0,
+                    sold_value FLOAT,
+                    sold_time TEXT,
                     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
                     FOREIGN KEY (action_id) REFERENCES action(id) ON DELETE CASCADE
                 )
