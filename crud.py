@@ -28,7 +28,7 @@ def link_user_action(user_id:int, action_id:int, bought_value:float):
     curseur = connexion.cursor()
     curseur.execute("""
                  INSERT INTO user_action
-                 VALUES (?, ?, ?, GETDATE())
+                 VALUES (?, ?, ?, datetime('now'))
                  """, (user_id, action_id, bought_value))
     connexion.commit()
     connexion.close()
@@ -48,12 +48,14 @@ def store_value_change(action_id:int, new_value:float):
     curseur = connexion.cursor()
     curseur.execute("""
                  INSERT INTO action_value_change
-                 VALUES (?, GETDATE(), ?)
+                 VALUES (?, datetime('now'), ?)
                  """, (action_id, new_value))
     connexion.commit()
     connexion.close()
     
 # Read
+
+def user_s_
 
 # Upgrade
 
@@ -75,10 +77,10 @@ def change_user_action(user_id:int, action_id:int, sold_value:float):
                     UPDATE user_action 
                         SET sold = True
                         SET sold_value = ?
-                        SET sold_time = GETDATE() 
+                        SET sold_time = datetime('now')  
                         WHERE user_id = ? 
                             AND action_id = ?
-                    """, (sold_value, action_id)) # time = GETDATE()
+                    """, (sold_value, user_id, action_id)) # time = GETDATE()
     connexion.commit()
     connexion.close()
     
@@ -105,4 +107,3 @@ def unlink_user_user(user_id_following:int, user_id_followed:int):
                     """, (user_id_following, user_id_followed))
     connexion.commit()
     connexion.close()
-    
