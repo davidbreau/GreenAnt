@@ -67,5 +67,47 @@ def change_action_value(new_value:int, action_id:int):
                     """, (new_value, action_id))
     connexion.commit()
     connexion.close()
+    
+def change_user_action(user_id:int, action_id:int, sold_value:float):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    UPDATE user_action 
+                        SET sold = True
+                        SET sold_value = ?
+                        SET sold_time = GETDATE() 
+                        WHERE user_id = ? 
+                        AND action_id = ?
+                    """, (sold_value, action_id)) # time = GETDATE()
+    connexion.commit()
+    connexion.close()
+    
 
 # Delete
+
+def delete_user(user_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    DELETE FROM user
+                        WHERE user_id = ?
+                    """, (user_id,))
+    curseur.execute("""
+                    DELETE FROM user_user
+                        WHERE user_id_following = ?
+                        or user_id_followed = ?
+                    """, (user_id,))
+    connexion.commit() ## executemany ?
+    connexion.close()
+
+def unlink_user_user(user_id_following:int, user_id_followed:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    DELETE FROM user_user
+                        WHERE user_id_following = ?
+                        AND user_id_followed = ?
+                    """, (user_id_following, user_id_followed))
+    connexion.commit()
+    connexion.close()
+    
