@@ -23,13 +23,13 @@ def create_action(company:str, value:float):
     connexion.commit()
     connexion.close()
     
-def link_user_action(user_id:int, action_id:int, bought_value:float, bought_time:str):
+def link_user_action(user_id:int, action_id:int, bought_value:float):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
     curseur.execute("""
                  INSERT INTO user_action
-                 VALUES (?, ?, ?, ?)
-                 """, (user_id, action_id, bought_value, bought_time))
+                 VALUES (?, ?, ?, GETDATE())
+                 """, (user_id, action_id, bought_value))
     connexion.commit()
     connexion.close()
     
@@ -43,13 +43,13 @@ def link_user_user(user_id_following:int, user_id_followed:int):
     connexion.commit()
     connexion.close()
     
-def store_value_change(action_id:int, time:str, value:float):
+def store_value_change(action_id:int, new_value:float):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
     curseur.execute("""
                  INSERT INTO action_value_change
-                 VALUES (?, ?)
-                 """, (action_id, time, value))
+                 VALUES (?, GETDATE(), ?)
+                 """, (action_id, new_value))
     connexion.commit()
     connexion.close()
     
@@ -77,7 +77,7 @@ def change_user_action(user_id:int, action_id:int, sold_value:float):
                         SET sold_value = ?
                         SET sold_time = GETDATE() 
                         WHERE user_id = ? 
-                        AND action_id = ?
+                            AND action_id = ?
                     """, (sold_value, action_id)) # time = GETDATE()
     connexion.commit()
     connexion.close()
@@ -92,12 +92,7 @@ def delete_user(user_id:int):
                     DELETE FROM user
                         WHERE user_id = ?
                     """, (user_id,))
-    curseur.execute("""
-                    DELETE FROM user_user
-                        WHERE user_id_following = ?
-                        or user_id_followed = ?
-                    """, (user_id,))
-    connexion.commit() ## executemany ?
+    connexion.commit()
     connexion.close()
 
 def unlink_user_user(user_id_following:int, user_id_followed:int):

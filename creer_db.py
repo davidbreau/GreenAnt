@@ -36,8 +36,8 @@ curseur.execute("""
                     sold BOOLEAN DEFAULT FALSE,
                     sold_value FLOAT DEFAULT NULL,
                     sold_time TEXT DEFAULT NULL,
-                    FOREIGN KEY (user_id) REFERENCES user(id),
-                    FOREIGN KEY (action_id) REFERENCES action(id)
+                    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+                    FOREIGN KEY (action_id) REFERENCES action(id) ON DELETE CASCADE
                 )
                 """)
 
@@ -45,8 +45,8 @@ curseur.execute("""
                 CREATE TABLE IF NOT EXISTS user_user (
                     user_id_following INTEGER,
                     user_id_followed INTEGER,
-                    FOREIGN KEY (user_id_following) REFERENCES user(id),
-                    FOREIGN KEY (user_id_followed) REFERENCES user(id)
+                    FOREIGN KEY (user_id_following) REFERENCES user(id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id_followed) REFERENCES user(id) ON DELETE CASCADE
                 )
                 """)
 
@@ -55,7 +55,7 @@ curseur.execute("""
                     action_id INTEGER,
                     time TEXT NOT NULL,
                     value FLOAT NOT NULL,
-                    FOREIGN KEY (action_id) REFERENCES action(id)
+                    FOREIGN KEY (action_id) REFERENCES action(id) ON DELETE CASCADE
                 )
                 """)
 
