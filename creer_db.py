@@ -14,7 +14,7 @@ curseur.execute("""
                     mail TEXT NOT NULL,
                     password TEXT NOT NULL,
                     is_active BOOLEAN NOT NULL,
-                    jwt TEXT NOT NULL 
+                    jwt TEXT
                 )
                 """)
 
