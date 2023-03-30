@@ -260,28 +260,33 @@ def update_token(id, token:str):
     connexion.commit()
     connexion.close()
     
-def update_mail(new_mail:int, user_id:int):
+# update_token(1, 7878)
+    
+def update_mail(new_mail:str, user_id:int):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
     curseur.execute("""
-                    UPDATE action 
+                    UPDATE user 
                         SET mail = ?
                         WHERE id = ?
                     """, (new_mail, user_id))
     connexion.commit()
     connexion.close()
 
-def update_password(new_password:int, user_id:int):
+# update_mail('davidbr@live.fr', 1)
+
+def update_password(new_password:str, user_id:int):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
     curseur.execute("""
-                    UPDATE action 
-                        SET pwd = ?
+                    UPDATE user 
+                        SET password = ?
                         WHERE id = ?
                     """, (new_password, user_id))
     connexion.commit()
     connexion.close()
 
+# update_password('azerty3', 1)
 
 ########################################################################################################
 ########################################### DELETE #####################################################
@@ -300,6 +305,18 @@ def delete_user(user_id:int):
 # delete_user(4)
 # delete_user(5)
 
+def delete_action(action_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    DELETE FROM action
+                        WHERE id = ?
+                    """, (action_id,))
+    connexion.commit()
+    connexion.close()
+    
+# delete_action(3)
+
 def unlink_user_user(user_id_following:int, user_id_followed:int):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
@@ -310,7 +327,7 @@ def unlink_user_user(user_id_following:int, user_id_followed:int):
                     """, (user_id_following, user_id_followed))
     connexion.commit()
     connexion.close()
-
+    
 # unlink_user_user(1,2)
 
 
