@@ -44,7 +44,7 @@ async def root():
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
-    if len(crud.get_user_id_from_mail(user.mail)) > 0:
+    if crud.get_users_by_mail(user.mail) is not None:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
         id_user = crud.create_user(user.username, user.firstname, user.lastname, user.mail, hasher_mdp(user.password), None)
@@ -52,6 +52,7 @@ async def inscription(user:UserRegister):
             "email" : user.mail,
             "mdp" : user.password,
             "id" : id_user
+        # ici ajouter la date de creation du token pour augmenter la secu
         }, SECRET_KEY, algorithm=ALGORITHM)
         crud.update_token(id_user, token)
         return {"token" : token}
@@ -68,6 +69,7 @@ async def login_token(user:UserLogin):
 async def mes_articles(req: Request):
     try:
         decode = decoder_token(req.headers["Authorization"])
-        return {"id_user" : crud.get_id_user_by_email(decode["email"])[0]}
+        # ici verif si le token exist ds la base de donnee
+        return {"id_user" : crud.get_user_id_from_mail(decode["email"])[0]}
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")

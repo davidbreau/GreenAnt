@@ -260,7 +260,28 @@ def update_token(id, token:str):
     connexion.commit()
     connexion.close()
     
-# update_token(1, '7878')
+def update_mail(new_mail:int, user_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    UPDATE action 
+                        SET mail = ?
+                        WHERE id = ?
+                    """, (new_mail, user_id))
+    connexion.commit()
+    connexion.close()
+
+def update_password(new_password:int, user_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    UPDATE action 
+                        SET pwd = ?
+                        WHERE id = ?
+                    """, (new_password, user_id))
+    connexion.commit()
+    connexion.close()
+
 
 ########################################################################################################
 ########################################### DELETE #####################################################
