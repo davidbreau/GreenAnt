@@ -24,13 +24,15 @@ def verifier_token(req: Request):
 
 # Classes contenu
 class UserRegister(BaseModel):
-    nom:str
-    email:str
-    mdp:str
+    username:str
+    firstname:str
+    lastname:str
+    mail:str
+    password:str
 
 class UserLogin(BaseModel):
-    email:str
-    mdp:str
+    mail:str
+    password:str
 
 app = FastAPI()
 
@@ -42,13 +44,13 @@ async def root():
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
-    if len(crud.get_users_by_mail(user.email)) > 0:
+    if len(crud.get_users_by_mail(user.mail)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
-        id_user = crud.create_user(user.nom, user.email, hasher_mdp(user.mdp), None)
+        id_user = crud.create_user(user.username, user.firstname, user.lastname, user.mail, hasher_mdp(user.password), None)
         token = jwt.encode({
             "email" : user.mail,
-            "mdp" : user.mdp,
+            "mdp" : user.password,
             "id" : id_user
         }, SECRET_KEY, algorithm=ALGORITHM)
         crud.update_token(id_user, token)
@@ -56,7 +58,7 @@ async def inscription(user:UserRegister):
 
 @app.post("/api/auth/token")
 async def login_token(user:UserLogin):
-    resultat = crud.obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
+    resultat = crud.obtenir_jwt_depuis_email_mdp(user.mail, hasher_mdp(user.password))
     if resultat is None:
         raise HTTPException(status_code=401, detail="Login ou mot de passe invalide")
     else:
