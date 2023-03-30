@@ -13,7 +13,8 @@ curseur.execute("""
                     last_name TEXT NOT NULL,
                     mail TEXT NOT NULL,
                     password TEXT NOT NULL,
-                    token TEXT NOT NULL 
+                    is_active BOOLEAN NOT NULL,
+                    jwt TEXT NOT NULL 
                 )
                 """)
 
@@ -36,8 +37,12 @@ curseur.execute("""
                     sold BOOLEAN DEFAULT 0,
                     sold_value FLOAT,
                     sold_time TEXT,
-                    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-                    FOREIGN KEY (action_id) REFERENCES action(id) ON DELETE CASCADE
+                    FOREIGN KEY (user_id) 
+                        REFERENCES user(id) 
+                        ON DELETE CASCADE,
+                    FOREIGN KEY (action_id) 
+                        REFERENCES action(id) 
+                        ON DELETE CASCADE
                 )
                 """)
 
@@ -45,8 +50,12 @@ curseur.execute("""
                 CREATE TABLE IF NOT EXISTS user_user (
                     user_id_following INTEGER,
                     user_id_followed INTEGER,
-                    FOREIGN KEY (user_id_following) REFERENCES user(id) ON DELETE CASCADE,
-                    FOREIGN KEY (user_id_followed) REFERENCES user(id) ON DELETE CASCADE
+                    FOREIGN KEY (user_id_following) 
+                        REFERENCES user(id) 
+                        ON DELETE CASCADE,
+                    FOREIGN KEY (user_id_followed) 
+                        REFERENCES user(id) 
+                        ON DELETE CASCADE
                 )
                 """)
 
@@ -55,7 +64,9 @@ curseur.execute("""
                     action_id INTEGER,
                     time TEXT NOT NULL,
                     value FLOAT NOT NULL,
-                    FOREIGN KEY (action_id) REFERENCES action(id) ON DELETE CASCADE
+                    FOREIGN KEY (action_id) 
+                        REFERENCES action(id) 
+                        ON DELETE CASCADE
                 )
                 """)
 
