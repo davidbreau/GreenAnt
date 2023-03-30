@@ -44,7 +44,7 @@ async def root():
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
-    if crud.get_user_id_from_mail(user.mail) is not None:
+    if crud.get_users_by_mail(user.mail) is not None:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
         id_user = crud.create_user(user.username, user.firstname, user.lastname, user.mail, hasher_mdp(user.password), None)
