@@ -14,6 +14,9 @@ def create_user(username: str, first_name:str, last_name:str, mail:str, password
     connexion.close()
     return user_id
     
+# create_user('mrdjb','david','breau','dvdbr@googlemail.com','azerty2', '1234')
+# create_user('av','arnaud', 'vila', 'arnaudvila@gmail.com', '5678', '12345')
+# create_user('olive','olivier', 'kotwica', 'okot@live.fr', '900.', '123456')
 
 def create_action(company:str, value:float):
     connexion = sqlite3.connect('bdd.db')
@@ -25,17 +28,34 @@ def create_action(company:str, value:float):
     connexion.commit()
     connexion.close()
     
-def link_user_action(user_id:int, action_id:int, bought_value:float):
+# create_action('mcdo', 50.0)
+    
+
+def link_user_action_auto(user_id:int, action_id:int):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
+
+    # Récupérer la valeur de l'action
+    curseur.execute("""
+                 SELECT value FROM action WHERE id = ?
+                 """, (action_id,))
+    value = curseur.fetchone()[0]
+
+    # Enregistrer l'achat de l'utilisateur pour cette action
     curseur.execute("""
                  INSERT INTO user_action
-                 VALUES (?, ?, ?, datetime('now'))
-                 """, (user_id, action_id, bought_value))
+                 VALUES (?, ?, ?, datetime('now'), NULL, NULL, NULL)
+                 """, (user_id, action_id, value))
+
     connexion.commit()
     connexion.close()
-    
-def link_user_user(user_id_following:int, user_id_followed:int):
+# link_user_action_auto(2,1)
+
+def link_user_user_no_self_follow(user_id_following:int, user_id_followed:int):
+    if user_id_following == user_id_followed:
+        print("Erreur: un utilisateur ne peut pas se suivre lui-même.")
+        return
+
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
     curseur.execute("""
@@ -44,16 +64,9 @@ def link_user_user(user_id_following:int, user_id_followed:int):
                  """, (user_id_following, user_id_followed))
     connexion.commit()
     connexion.close()
-    
-def store_value_change(action_id:int, new_value:float):
-    connexion = sqlite3.connect('bdd.db')
-    curseur = connexion.cursor()
-    curseur.execute("""
-                 INSERT INTO action_value_change
-                 VALUES (?, datetime('now'), ?)
-                 """, (action_id, new_value))
-    connexion.commit()
-    connexion.close()
+
+# link_user_user_no_self_follow(1,2)
+
     
 # Read
 
@@ -63,9 +76,11 @@ def get_user_from_mail(mail:str):
     curseur.execute("""
                     SELECT * FROM user WHERE mail=?
                     """, (mail,))
-    resultat = curseur.fetchall()
+    result = curseur.fetchall()
     connexion.close()
-    return resultat
+    return result
+
+# print(get_user_from_mail('okot@live.fr'))
 
 def get_user_id_from_mail(mail:str):
     connexion = sqlite3.connect("bdd.db")
@@ -77,6 +92,8 @@ def get_user_id_from_mail(mail:str):
     connexion.close()
     return resultat
 
+# print(get_user_id_from_mail('okot@live.fr'))
+
 def get_actions_list():
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
@@ -86,6 +103,8 @@ def get_actions_list():
     result = curseur.fetchall()
     connexion.close()
     return result
+
+print(get_actions_list())
 
 def get_user_s_actions_list(user_id:int):
     connexion = sqlite3.connect('bdd.db')
@@ -115,8 +134,13 @@ def get_user_s_actions_sum(user_id:int):
     return result
 
 
-
 # Update
+# def value_change(action_id:int, new_value:float):
+#     connexion = sqlite3.connect('bdd.db')
+#     curseur = connexion.cursor()
+
+#     connexion.commit()
+#     connexion.close()
 
 def update_action_value(new_value:int, action_id:int):
     connexion = sqlite3.connect('bdd.db')
@@ -126,6 +150,10 @@ def update_action_value(new_value:int, action_id:int):
                         SET value = ?
                         WHERE id = ?
                     """, (new_value, action_id))
+    curseur.execute("""
+                    INSERT INTO action_value_change
+                    VALUES (?, datetime('now'), ?)
+                    """, (action_id, new_value))
     connexion.commit()
     connexion.close()
     
@@ -134,9 +162,7 @@ def update_user_action(user_id:int, action_id:int, sold_value:float):
     curseur = connexion.cursor()
     curseur.execute("""
                     UPDATE user_action 
-                        SET sold = True
-                        SET sold_value = ?
-                        SET sold_time = datetime('now')  
+                        SET sold = True, SET sold_value = ?, SET sold_time = datetime('now')  
                         WHERE user_id = ? 
                             AND action_id = ?
                     """, (sold_value, user_id, action_id))
@@ -162,10 +188,13 @@ def delete_user(user_id:int):
     curseur = connexion.cursor()
     curseur.execute("""
                     DELETE FROM user
-                        WHERE user_id = ?
+                        WHERE id = ?
                     """, (user_id,))
     connexion.commit()
     connexion.close()
+    
+# delete_user(4)
+# delete_user(5)
 
 def unlink_user_user(user_id_following:int, user_id_followed:int):
     connexion = sqlite3.connect('bdd.db')
@@ -177,6 +206,8 @@ def unlink_user_user(user_id_following:int, user_id_followed:int):
                     """, (user_id_following, user_id_followed))
     connexion.commit()
     connexion.close()
+
+# unlink_user_user(1,2)
 
 # USER AUTH :
 
