@@ -44,7 +44,7 @@ async def root():
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
-    if len(crud.get_users_by_mail(user.mail)) > 0:
+    if len(crud.get_user_id_from_mail(user.mail)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
         id_user = crud.create_user(user.username, user.firstname, user.lastname, user.mail, hasher_mdp(user.password), None)
@@ -58,7 +58,7 @@ async def inscription(user:UserRegister):
 
 @app.post("/api/auth/token")
 async def login_token(user:UserLogin):
-    resultat = crud.obtenir_jwt_depuis_email_mdp(user.mail, hasher_mdp(user.password))
+    resultat = crud.get_jwt_from_mail_password(user.mail, hasher_mdp(user.password))
     if resultat is None:
         raise HTTPException(status_code=401, detail="Login ou mot de passe invalide")
     else:
