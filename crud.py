@@ -247,6 +247,7 @@ def update_user_action_sold(user_id:int, action_id:int):
     connexion.close()
     
 # update_user_action_sold(1,2)
+# update_user_action_sold(1,1)
     
 def update_token(id, token:str):
     connexion = sqlite3.connect("bdd.db")
