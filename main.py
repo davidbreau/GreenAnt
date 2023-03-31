@@ -38,18 +38,15 @@ app = FastAPI()
 
 # Début des endpoints
 
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
-
 @app.get("/")
 async def root():
     actions = crud.get_actions_list()
-    return {"Actions": actions}
+    return {"AVAILABLE ACTIONS": actions}
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
-    if crud.get_users_by_mail(user.mail) is not None:
+    print(crud.get_user_from_mail(user.mail))
+    if len(crud.get_user_from_mail(user.mail)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
         id_user = crud.create_user(user.username, user.first_name, user.last_name, user.mail, hasher_mdp(user.password), None)
@@ -80,6 +77,3 @@ async def mes_articles(req: Request):
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
     
     
-@app.post("api/buy_action")
-async def buy():
-    buy_action = crud.link_user_action()
