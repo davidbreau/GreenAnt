@@ -143,7 +143,7 @@ async def get_user_actions(user_id: int, req: Request):
         raise HTTPException(status_code=500, detail="Erreur interne du serveur")
 
 
-# voir les actions d un utilisateur suivi
+# voir les actions d'un utilisateur suivi
 @app.get("/api/actions/followed/{user_id_followed}")
 async def get_actions_by_user_id_followed(user_id_followed: int, req: Request):
     try:
@@ -173,6 +173,7 @@ async def follow_user(user_id_following: int, user_id_followed: int, req: Reques
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erreur serveur : {}".format(str(e)))
 
+
 # pour arreter de suivre un utilisateur
 @app.post("/api/user/{user_id_following}/unfollow/{user_id_followed}")
 async def unfollow(user_id_following:int, user_id_followed:int, current_user: dict = Depends(verify_token)):
@@ -183,3 +184,26 @@ async def unfollow(user_id_following:int, user_id_followed:int, current_user: di
     crud.unlink_user_user(user_id_following, user_id_followed)
     return {"message": f"Vous ne suivez plus l'utilisateur {user_id_followed}"}
 
+
+# pour vendre une action d'un utilisateur
+@app.post("/api/action/vendre")
+async def vendre_action(req: Request, action_id: int, value: float):
+    try:
+        # Vérifier que l'utilisateur est identifié
+        token = verify_token(req)
+        user_id = decoder_token(token)["id"]
+
+        # Vérifier que l'action appartient à l'utilisateur
+        action = crud.get_action_by_id(action_id)
+        if action is None or action.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Action non trouvée")
+
+        # Vendre l'action
+        crud.update_user_action_sold(action_id, value)
+
+        return {"message": "Action vendue avec succès"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Une erreur est survenue lors de la vente de l'action")
