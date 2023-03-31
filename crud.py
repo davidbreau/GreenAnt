@@ -46,11 +46,6 @@ def create_action(company:str, value:float):
     connexion.commit()
     connexion.close()
     
-# create_action('mcdo', 50.0)
-# create_action('LVMH', 700.45)
-# create_action('Air France', '1600.13')
-    
-
 def link_user_action(user_id:int, action_id:int):
     connexion = sqlite3.connect('bdd.db')
     curseur = connexion.cursor()
@@ -132,6 +127,18 @@ def get_actions_list():
 
 # print(get_actions_list())
 
+def get_users_list():
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT id, first_name, last_name, mail FROM user
+                    """)
+    result = curseur.fetchall()
+    connexion.close()
+    return result
+
+# print(get_users_list())
+
 def get_user_id_from_jwt(jwt:str):
     connexion = sqlite3.connect("bdd.db")
     curseur = connexion.cursor()
@@ -197,8 +204,20 @@ def get_following_actions(user_id:int):
 
     connexion.close()
     return actions
-
 # print(get_following_actions(3))
+
+def get_action_id_from_company(company:str):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT id FROM action
+                        WHERE company = ?
+                    """, (company,))
+    result = curseur.fetchone()
+    connexion.close()
+    return result[0]
+
+# print(get_action_id_from_company('EDENRED'))
 
 ########################################################################################################
 ########################################### UPDATE #####################################################
