@@ -103,6 +103,29 @@ def get_user_from_mail(mail:str):
 
 # print(get_user_from_mail('okot@live.fr'))
 
+
+def get_user_from_id(id:int):
+    connexion = sqlite3.connect("bdd.db")
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT * FROM user WHERE id=?
+                    """, (id,))
+    result = curseur.fetchall()
+    connexion.close()
+    return result
+
+
+def get_action_from_id(id:int):
+    connexion = sqlite3.connect("bdd.db")
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT * FROM action WHERE id=?
+                    """, (id,))
+    result = curseur.fetchall()
+    connexion.close()
+    return result
+
+
 def get_user_id_from_mail(mail:str):
     connexion = sqlite3.connect("bdd.db")
     curseur = connexion.cursor()
@@ -167,6 +190,17 @@ def get_user_s_actions_list(user_id:int):
     return result
 
 # print(get_user_s_actions_list(2))
+
+def get_all_its_followed(user_id:int):
+    connexion = sqlite3.connect('bdd.db')
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT user_id_followed from user_user
+                        WHERE user_id_following = ?
+                    """, (user_id,))
+    result = curseur.fetchall()
+    connexion.close()
+    return result
 
 def get_user_s_actions_sum(user_id:int):
     connexion = sqlite3.connect('bdd.db')

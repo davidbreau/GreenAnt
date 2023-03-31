@@ -88,7 +88,7 @@ async def root():
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
-    if len(crud.get_users_by_mail(user.mail)) > 0:
+    if len(crud.get_user_from_mail(user.mail)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
         id_user = crud.create_user(user.username, user.first_name, user.last_name, user.mail, hasher_mdp(user.password), None)
@@ -127,7 +127,7 @@ async def get_user_actions(user_id: int, req: Request):
         verify_token(req)
 
         # Récupération de la liste des actions de l'utilisateur
-        actions = crud.get_actions_by_user_id(user_id)
+        actions = crud.get_user_s_actions_list(user_id)
 
         # Vérification que l'utilisateur a bien des actions
         if actions is None:
@@ -143,19 +143,23 @@ async def get_user_actions(user_id: int, req: Request):
         raise HTTPException(status_code=500, detail="Erreur interne du serveur")
 
 
-# voir les actions d'un utilisateur suivi
-@app.get("/api/actions/followed/{user_id_followed}")
-async def get_actions_by_user_id_followed(user_id_followed: int, req: Request):
+# affiche les actions des follower (20premieres)
+@app.get("/api/actions/suivies")
+async def actions_suivies(req: Request, skip: int = 0, limit: int = 20):
     try:
-        # Vérification de l'authentification
-        decode = verify_token(req)
-        # Récupération de l'ID de l'utilisateur connecté
-        id_user = crud.get_user_id_from_mail(decode["email"])[0]
-        # Récupération de la liste des actions suivies par l'utilisateur
-        actions_followed = crud.get_actions_by_user_id_followed(user_id_followed, id_user)
-        return {"actions_followed": actions_followed}
+        # On récupère le token depuis le header
+        token = req.headers["Authorization"]
+        # On décode le token pour récupérer l'id de l'utilisateur
+        decode = decoder_token(token)
+        user_id = decode["id"]
+        # On récupère les ids des utilisateurs que l'on suit
+        ids_followed = crud.get_all_its_followed(user_id)
+        # On récupère les actions de ces utilisateurs
+        actions = crud.get_following_actions(ids_followed, skip, limit)
+        # On renvoie les actions
+        return actions
     except:
-        raise HTTPException(status_code=401, detail="Vous devez être identifié pour accéder à cet endpoint")
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
 
 
 # pour suivre un utilisateur
@@ -166,7 +170,7 @@ async def follow_user(user_id_following: int, user_id_followed: int, req: Reques
         if decode["id"] != user_id_following:
             raise HTTPException(status_code=403, detail="Vous ne pouvez pas suivre cet utilisateur")
         else:
-            crud.create_user_user(user_id_following, user_id_followed)
+            crud.link_user_user(user_id_following, user_id_followed)
             return {"message": "Vous suivez maintenant l'utilisateur avec l'ID : {}".format(user_id_followed)}
     except HTTPException as e:
         raise e
@@ -179,7 +183,7 @@ async def follow_user(user_id_following: int, user_id_followed: int, req: Reques
 async def unfollow(user_id_following:int, user_id_followed:int, current_user: dict = Depends(verify_token)):
     if user_id_following != current_user["id"]:
         raise HTTPException(status_code=401, detail="Vous n'êtes pas autorisé à accéder à cette ressource")
-    if crud.get_user_by_id(user_id_followed) is None:
+    if crud.get_user_from_id(user_id_followed) is None:
         raise HTTPException(status_code=404, detail="L'utilisateur que vous souhaitez ne pas suivre n'existe pas")
     crud.unlink_user_user(user_id_following, user_id_followed)
     return {"message": f"Vous ne suivez plus l'utilisateur {user_id_followed}"}
@@ -194,7 +198,7 @@ async def vendre_action(req: Request, action_id: int, value: float):
         user_id = decoder_token(token)["id"]
 
         # Vérifier que l'action appartient à l'utilisateur
-        action = crud.get_action_by_id(action_id)
+        action = crud.get_action_from_id(action_id)
         if action is None or action.user_id != user_id:
             raise HTTPException(status_code=404, detail="Action non trouvée")
 
@@ -207,3 +211,4 @@ async def vendre_action(req: Request, action_id: int, value: float):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Une erreur est survenue lors de la vente de l'action")
+
