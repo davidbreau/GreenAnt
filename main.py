@@ -19,14 +19,14 @@ def hasher_mdp(mdp:str) -> str:
 def decoder_token(token:str)->dict:
     return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
 
-def verifier_token(req: Request):
+def verify_token(req: Request):
     token = req.headers["Authorization"]
 
 # Classes contenu
 class UserRegister(BaseModel):
     username:str
-    firstname:str
-    lastname:str
+    first_name:str
+    last_name:str
     mail:str
     password:str
 
@@ -77,19 +77,24 @@ app = FastAPI()
 
 # Début des endpoints
 
+# @app.get("/")
+# async def root():
+#     return {"message": "Hello World"}
+
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    actions = crud.get_actions_list()
+    return {"Actions": actions}
 
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
     if len(crud.get_users_by_mail(user.mail)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
     else:
-        id_user = crud.create_user(user.username, user.firstname, user.lastname, user.mail, hasher_mdp(user.password), None)
+        id_user = crud.create_user(user.username, user.first_name, user.last_name, user.mail, hasher_mdp(user.password), None)
         token = jwt.encode({
-            "email" : user.mail,
-            "mdp" : user.password,
+            "mail" : user.mail,
+            "password" : user.password,
             "id" : id_user
         # ici ajouter la date de creation du token pour augmenter la secu
         }, SECRET_KEY, algorithm=ALGORITHM)
@@ -119,7 +124,7 @@ async def mes_articles(req: Request):
 async def get_user_actions(user_id: int, req: Request):
     try:
         # Vérification de l'authentification de l'utilisateur
-        verifier_token(req)
+        verify_token(req)
 
         # Récupération de la liste des actions de l'utilisateur
         actions = crud.get_actions_by_user_id(user_id)
@@ -143,7 +148,7 @@ async def get_user_actions(user_id: int, req: Request):
 async def get_actions_by_user_id_followed(user_id_followed: int, req: Request):
     try:
         # Vérification de l'authentification
-        decode = verifier_token(req)
+        decode = verify_token(req)
         # Récupération de l'ID de l'utilisateur connecté
         id_user = crud.get_user_id_from_mail(decode["email"])[0]
         # Récupération de la liste des actions suivies par l'utilisateur
