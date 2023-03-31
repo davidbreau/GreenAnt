@@ -172,3 +172,14 @@ async def follow_user(user_id_following: int, user_id_followed: int, req: Reques
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erreur serveur : {}".format(str(e)))
+
+# pour arreter de suivre un utilisateur
+@app.post("/api/user/{user_id_following}/unfollow/{user_id_followed}")
+async def unfollow(user_id_following:int, user_id_followed:int, current_user: dict = Depends(verify_token)):
+    if user_id_following != current_user["id"]:
+        raise HTTPException(status_code=401, detail="Vous n'êtes pas autorisé à accéder à cette ressource")
+    if crud.get_user_by_id(user_id_followed) is None:
+        raise HTTPException(status_code=404, detail="L'utilisateur que vous souhaitez ne pas suivre n'existe pas")
+    crud.unlink_user_user(user_id_following, user_id_followed)
+    return {"message": f"Vous ne suivez plus l'utilisateur {user_id_followed}"}
+
